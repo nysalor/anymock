@@ -31,10 +31,10 @@ module Anymock
       server.start
     end
 
-    def output(req, body)
+    def output(req_string, body)
       puts "request:"
       puts "----"
-      puts body
+      puts req_string
       puts "----"
       puts "response:"
       puts "----"
