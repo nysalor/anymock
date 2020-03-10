@@ -8,7 +8,9 @@ module Anymock
     option :a, type: :string, default: 'localhost'
     option :p, type: :string, default: '8080'
     option :r, type: :string, default: nil
+    option :l, type: :string
     option :m, type: :boolean, default: false
+    option :j, type: :boolean, default: false
 
     desc "start", "start mock server"
 
@@ -28,7 +30,9 @@ module Anymock
         address: options[:a],
         port: options[:p],
         response: options[:r],
-        mirror: options[:m]
+        log: options[:l],
+        mirror: options[:m],
+        json: options[:j]
       }
     end
   end

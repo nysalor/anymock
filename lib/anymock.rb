@@ -2,6 +2,7 @@ require "anymock/version"
 require "anymock/cli"
 require "webrick"
 require "json"
+require "logger"
 
 module Anymock
   class Server
@@ -12,12 +13,18 @@ module Anymock
       @address = opts[:address]
       @port = opts[:port]
       @response = opts[:response]
+      @log = opts[:log]
       @mirror = opts[:mirror]
+      @json = opts[:json]
     end
 
     def start
       server.mount_proc '/' do |req, res|
-        req_string = { req.request_method => req.query }.to_json
+        output_params = {
+          path: req.path,
+          method: req.request_method,
+          query: req.query
+        }
         res.status = status_code(req.request_method)
         if @response
           res.body = @response
@@ -26,20 +33,22 @@ module Anymock
         else
           res.status = 204
         end
-        output req_string, res.body
+        output output_params.merge({ response: res.body })
       end
       server.start
     end
 
-    def output(req_string, body)
-      puts "request:"
-      puts "----"
-      puts req_string
-      puts "----"
-      puts "response:"
-      puts "----"
-      puts body
-      puts "----"
+    def output(params)
+      if @json
+        logger.info params.to_json
+      else
+        logger.info '----'
+        %i(path method query response).each do |n|
+          logger.info "#{n}:"
+          logger.info params[n]
+        end
+        logger.info '----'
+      end
     end
 
     private
@@ -53,6 +62,14 @@ module Anymock
       when 'PUT'
         200
       end
+    end
+
+    def logger
+      @logger ||= Logger.new(log)
+    end
+
+    def log
+      @log || STDOUT
     end
 
     def server
