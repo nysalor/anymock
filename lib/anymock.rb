@@ -13,6 +13,7 @@ module Anymock
       @address = opts[:address]
       @port = opts[:port]
       @response = opts[:response]
+      @file = opts[:file]
       @log = opts[:log]
       @mirror = opts[:mirror]
       @json = opts[:json]
@@ -26,7 +27,11 @@ module Anymock
           query: req.query
         }
         res.status = status_code(req.request_method)
-        if @response
+        if @file
+          File.open(@file) do |f|
+            res.body = f.read
+          end
+        elsif @response
           res.body = @response
         elsif @mirror
           res.body = req_string
